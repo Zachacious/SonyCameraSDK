@@ -1,4 +1,82 @@
-export const sony = {
+const fetch = require("node-fetch");
+
+let sony = {};
+
+sony.getMethodTypesVersion = 1.0;
+
+sony.setTimeReq = {
+  dateTime: "2014-04-01T21:35:43Z",
+  timeZoneOffsetMinute: 540,
+  dstOffsetMinute: 0,
+};
+
+sony.autoPowerOffSec = 60;
+
+sony.seekStreamingPos = 1500; // milliseconds
+
+sony.remotePlay = {
+  type: "simpleStreaming",
+  uri: "video:content?contentId=xxxxxxxxx",
+};
+
+sony.getContentCountReq = {
+  uri: "storage:memoryCard1",
+  target: "all",
+  view: "date", // or flat
+};
+
+sony.loopRecTimeMin = 10;
+
+sony.intervalTimeSec = 10;
+
+sony.colorSetting = "Neutral";
+
+sony.scene = "Under Water";
+
+sony.viewAngle = 120;
+
+sony.movie = {
+  fileFormat: "XAVC S",
+  quality: "HQ",
+};
+
+sony.postviewImageSize = "Original";
+
+sony.stills = {
+  aspectRatio: "4:3",
+  size: "5M",
+  quality: "RAW+JPEG",
+};
+
+sony.touchAFPos = {
+  x: 23.4,
+  y: 45.6,
+};
+
+sony.trackingFocusPos = {
+  x: 23.4,
+  y: 45.6,
+};
+
+sony.selfTimerSeconds = 2;
+
+sony.exposureCompensation = 2;
+
+sony.fStop = 5.6;
+
+sony.shutterSpeed = "1/2";
+
+sony.iso = 400;
+
+sony.whiteBalance = {
+  param: "Color Temperature",
+  enabled: true,
+  value: 2500,
+};
+
+// =============================================================
+
+sony = {...sony,
   // returns
   /*{
  "result": [0],
@@ -1445,7 +1523,7 @@ export const sony = {
     params: [
       sony.whiteBalance.param,
       sony.whiteBalance.enabled,
-      sony.whiteBalanced.value,
+      sony.whiteBalance.value,
     ],
     id: 1,
     version: "1.0",
@@ -3300,78 +3378,19 @@ export const sony = {
   },
 };
 
-//================================================
-// variables =====================================
-// ===============================================
 
-sony.getMethodTypesVersion = 1.0;
-
-sony.setTimeReq = {
-  dateTime: "2014-04-01T21:35:43Z",
-  timeZoneOffsetMinute: 540,
-  dstOffsetMinute: 0,
+sony.makeApiCall = async (endpoint, body) => {
+  try {
+    const res = await fetch(`${endpoint}/camera`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    const jsonres = await res.json();
+    console.log(jsonres);
+    return jsonres;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-sony.autoPowerOffSec = 60;
-
-sony.seekStreamingPos = 1500; // milliseconds
-
-sony.remotePlay = {
-  type: "simpleStreaming",
-  uri: "video:content?contentId=xxxxxxxxx",
-};
-
-sony.getContentCountReq = {
-  uri: "storage:memoryCard1",
-  target: "all",
-  view: "date", // or flat
-};
-
-sony.loopRecTimeMin = 10;
-
-sony.intervalTimeSec = 10;
-
-sony.colorSetting = "Neutral";
-
-sony.scene = "Under Water";
-
-sony.viewAngle = 120;
-
-sony.movie = {
-  fileFormat: "XAVC S",
-  quality: "HQ",
-};
-
-sony.postviewImageSize = "Original";
-
-sony.stills = {
-  aspectRatio: "4:3",
-  size: "5M",
-  quality: "RAW+JPEG",
-};
-
-sony.touchAFPos = {
-  x: 23.4,
-  y: 45.6,
-};
-
-sony.trackingFocusPos = {
-  x: 23.4,
-  y: 45.6,
-};
-
-sony.selfTimerSeconds = 2;
-
-sony.exposureCompensation = 2;
-
-sony.fStop = 5.6;
-
-sony.shutterSpeed = "1/2";
-
-sony.iso = 400;
-
-sony.whiteBalance = {
-  param: "Color Temperature",
-  enabled: true,
-  value: 2500,
-};
+module.exports = sony;
