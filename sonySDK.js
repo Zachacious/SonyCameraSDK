@@ -3386,7 +3386,6 @@ sony.makeApiCall = async (endpoint, body) => {
       body: JSON.stringify(body),
     });
     const jsonres = await res.json();
-    console.log(jsonres);
     return jsonres;
   } catch (err) {
     console.log(err);

@@ -3,29 +3,17 @@ const client = new Client();
 const fetch = require("node-fetch");
 const stringParserXML = require('xml2js').parseString;
 const sony = require('./sonySDK');
-console.log('sony--');
-// const stringParserXML = new xml2js.Parser();
-
-// poll for data
-// once found get data saved - endpoint
-// setup listeners
 
 let endpoint = '';
 
 // console.log(ts);
 let timer;
-client.on("notify", function (test) {
-  console.log(test);
-  //console.log('Got a notification.')
-});
+// client.on("notify", function (test) {
+//   console.log(test);
+//   //console.log('Got a notification.')
+// });
 
 client.on("response", function inResponse(headers, code, rinfo) {
-  // console.log(
-  //   "Got a response to an m-search:\n%d\n%s\n%s",
-  //   code,
-  //   JSON.stringify(headers, null, "  "),
-  //   JSON.stringify(rinfo, null, "  ")
-  // );
   if(code === 200) {
     console.log(`Location: ${headers.LOCATION}`)
     fetch(headers.LOCATION).then(async res => {
@@ -46,37 +34,24 @@ client.on("response", function inResponse(headers, code, rinfo) {
 });
 
 // Or maybe if you want to scour for everything after 5 seconds
-timer = setInterval(function () {
+timer = setInterval(async () => {
   //   client.search("ssdp:all");
-  client.search("urn:schemas-sony-com:service:ScalarWebAPI:1");
+  const res = await client.search("urn:schemas-sony-com:service:ScalarWebAPI:1");
+  console.log('Client Result');
+    console.log(res);
 }, 200);
-
-// And after 10 seconds, you want to stop
-// setTimeout(function () {
-//   client.stop();
-// }, 10000);
 
 const main = async () => {
   // need to check getEvent on these and call at appropriate time
-  await sony.makeApiCall(endpoint, sony.startRecMode);
-  await sony.makeApiCall(endpoint, sony.setShootModeStill);
-  await sony.makeApiCall(endpoint, sony.actTakePicture);
-   await sony.makeApiCall(endpoint, sony.stopRecMode);
-  // try {
-  //   const res = await fetch("http://192.168.122.1:8080/sony/camera", {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       method: "stopRecMode",
-  //       params: [],
-  //       id: 1,
-  //       version: "1.0",
-  //     }),
-  //   });
-  //   const jsonres = await res.json();
-  //   console.log(jsonres);
-  // } catch (err) {
-  //   console.log(err);
-  // }
+  // console.log(await sony.makeApiCall(endpoint, sony.getAvailableApiList));
+  // console.log(await sony.makeApiCall(endpoint, sony.getVersions));
+  // console.log(await sony.makeApiCall(endpoint, sony.getMethodTypes));
+  // console.log(await sony.makeApiCall(endpoint, sony.startRecMode));
+  // // console.log(await sony.makeApiCall(endpoint, sony.getEvent));
+  // console.log(await sony.makeApiCall(endpoint, sony.setShootModeStill));
+  // // console.log(await sony.makeApiCall(endpoint, sony.getEvent));
+  // console.log(await sony.makeApiCall(endpoint, sony.actTakePicture));
+  // // console.log(await sony.makeApiCall(endpoint, sony.getEvent));
+  // console.log(await sony.makeApiCall(endpoint, sony.stopRecMode));
+  // // console.log(await sony.makeApiCall(endpoint, sony.getEvent));
 };
-
-// main();
