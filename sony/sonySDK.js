@@ -76,7 +76,8 @@ sony.whiteBalance = {
 
 // =============================================================
 
-sony = {...sony,
+sony = {
+  ...sony,
   // returns
   /*{
  "result": [0],
@@ -3377,7 +3378,6 @@ sony = {...sony,
     version: "1.0",
   },
 };
-
 
 sony.makeApiCall = async (endpoint, body) => {
   try {

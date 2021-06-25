@@ -2,7 +2,9 @@ const Client = require("node-ssdp").Client;
 const client = new Client();
 const fetch = require("node-fetch");
 const stringParserXML = require("xml2js").parseString;
-const sony = require("./sonySDK");
+// const sony = require("./sonySDK");
+
+let sony = {};
 
 sony.connection = {
   timer: null,
@@ -65,3 +67,5 @@ sony.pollConnection = async () => {
     sony.connection.connecting = false;
   }, sony.connection.timeLimit);
 };
+
+module.exports = sony;
