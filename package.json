@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@quasar/cli": "^1.2.1",
     "node-fetch": "^2.6.1",
     "node-ssdp": "^4.0.1",
     "xml2js": "^0.4.23"
