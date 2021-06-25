@@ -3,7 +3,7 @@ const client = new Client();
 const fetch = require("node-fetch");
 const stringParserXML = require("xml2js").parseString;
 const sony = require("./sony");
-console.log(sony);
+
 // let endpoint = '';
 
 // console.log(ts);
@@ -35,6 +35,7 @@ console.log(sony);
 
 // Or maybe if you want to scour for everything after 5 seconds
 timer = setInterval(async () => {
+  await sony.pollConnection();
   //   client.search("ssdp:all");
   // await client.search("urn:schemas-sony-com:service:ScalarWebAPI:1");
 }, 200);

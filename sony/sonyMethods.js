@@ -13,7 +13,7 @@ sony.connection = {
   connecting: false,
   endpoint: "",
   interval: 200,
-  timeLimit: 5000,
+  timeLimit: 2000,
 };
 sony.deviceInfo = {
   raw: null,
@@ -58,12 +58,14 @@ client.on("response", function inResponse(headers, code, rinfo) {
 sony.pollConnection = async () => {
   sony.connecting = true;
   sony.connection.timer = setInterval(function () {
+    console.log("Searching for camera connection...");
     client.search("urn:schemas-sony-com:service:ScalarWebAPI:1");
   }, sony.connection.interval);
 
   sony.connectionTimeoutTimer = setTimeout(() => {
     clearTimeout(sony.connectionTimer);
-    sony.connectionTimer = null;
+    console.log("Timeout - Connection not found");
+    sony.connection.timer = null;
     sony.connection.connecting = false;
   }, sony.connection.timeLimit);
 };
