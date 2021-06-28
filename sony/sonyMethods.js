@@ -113,4 +113,21 @@ sony.beginShootMode = async () => {
   // console.log(await sony.makeApiCall(bodies.stopRecMode));
 };
 
+sony.endShootMode = async () => {
+  let ret = { error: null, data: null };
+  let calls = await sony.makeApiCall(bodies.getAvailableApiList);
+  calls = calls.result[0];
+  if (!calls.includes("stopRecMode")) {
+    ret.error = "stopRecMode not available";
+    return ret;
+  }
+
+  const res = await sony.makeApiCall(bodies.stopRecMode);
+  console.log(res.result[0]);
+  if (res.result[0] === 0) {
+    ret.data = "Success";
+    return ret;
+  }
+};
+
 module.exports = sony;
