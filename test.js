@@ -4,7 +4,9 @@ const fetch = require("node-fetch");
 const stringParserXML = require("xml2js").parseString;
 const sony = require("./sony");
 
-// Or maybe if you want to scour for everything after 5 seconds
+sony.pollConnection();
+
+// check for connection
 timer = setInterval(async () => {
   await sony.pollConnection();
-}, 200);
+}, sony.connection.timeLimit);

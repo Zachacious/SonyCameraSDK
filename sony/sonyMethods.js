@@ -17,6 +17,9 @@ sony.connection = {
 };
 sony.deviceInfo = {
   raw: null,
+  name: "",
+  type: "",
+  id: "",
 };
 
 client.on("response", function inResponse(headers, code, rinfo) {
@@ -30,27 +33,28 @@ client.on("response", function inResponse(headers, code, rinfo) {
             console.log(err);
           }
           sony.deviceInfo.raw = result;
+          sony.deviceInfo.name =
+            sony.deviceInfo.raw.root.device[0].friendlyName[0];
+          sony.deviceInfo.type =
+            sony.deviceInfo.raw.root.device[0].deviceType[0];
+          sony.deviceInfo.id = sony.deviceInfo.raw.root.device[0].UDN[0];
+          console.log(sony.deviceInfo);
           sony.connection.endpoint =
-            xmljson.root.device[0]["av:X_ScalarWebAPI_DeviceInfo"][0][
-              "av:X_ScalarWebAPI_ServiceList"
-            ][0]["av:X_ScalarWebAPI_Service"][0][
-              "av:X_ScalarWebAPI_ActionList_URL"
-            ][0];
-          console.log(
-            xmljson.root.device[0]["av:X_ScalarWebAPI_DeviceInfo"][0][
-              "av:X_ScalarWebAPI_ServiceList"
-            ][0]["av:X_ScalarWebAPI_Service"][0][
-              "av:X_ScalarWebAPI_ActionList_URL"
-            ][0]
-          );
+            sony.deviceInfo.raw.root.device[0][
+              "av:X_ScalarWebAPI_DeviceInfo"
+            ][0]["av:X_ScalarWebAPI_ServiceList"][0][
+              "av:X_ScalarWebAPI_Service"
+            ][0]["av:X_ScalarWebAPI_ActionList_URL"][0];
           sony.connection.connecting = false;
           if (timer) clearInterval(timer);
           client.stop();
+          sony.connection.connected = true;
         });
       });
     } catch (err) {
       console.log("Error fetching connection data as json");
       console.log(err);
+      sony.connection.connected = false;
     }
   }
 });
@@ -67,6 +71,7 @@ sony.pollConnection = async () => {
     console.log("Timeout - Connection not found");
     sony.connection.timer = null;
     sony.connection.connecting = false;
+    sony.connection.connected = false;
   }, sony.connection.timeLimit);
 };
 

@@ -3379,7 +3379,7 @@ sony = {
   },
 };
 
-sony.makeApiCall = async (endpoint, body) => {
+sony.makeApiCall = async (endpoint, body = {}) => {
   try {
     const res = await fetch(`${endpoint}/camera`, {
       method: "POST",
