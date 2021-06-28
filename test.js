@@ -9,4 +9,7 @@ sony.pollConnection();
 // check for connection
 timer = setInterval(async () => {
   await sony.pollConnection();
+  if (sony.connection.connected) {
+    await sony.beginShootMode();
+  }
 }, sony.connection.timeLimit);

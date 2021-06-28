@@ -3379,17 +3379,4 @@ sony = {
   },
 };
 
-sony.makeApiCall = async (endpoint, body = {}) => {
-  try {
-    const res = await fetch(`${endpoint}/camera`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-    const jsonres = await res.json();
-    return jsonres;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 module.exports = sony;

@@ -2,7 +2,7 @@ const Client = require("node-ssdp").Client;
 const client = new Client();
 const fetch = require("node-fetch");
 const stringParserXML = require("xml2js").parseString;
-// const sony = require("./sonySDK");
+const bodies = require("./sonySDK");
 
 let sony = {};
 
@@ -13,7 +13,7 @@ sony.connection = {
   connecting: false,
   endpoint: "",
   interval: 200,
-  timeLimit: 2000,
+  timeLimit: 3000,
 };
 sony.deviceInfo = {
   raw: null,
@@ -46,7 +46,9 @@ client.on("response", function inResponse(headers, code, rinfo) {
               "av:X_ScalarWebAPI_Service"
             ][0]["av:X_ScalarWebAPI_ActionList_URL"][0];
           sony.connection.connecting = false;
-          if (timer) clearInterval(timer);
+          if (sony.connection.timer) clearInterval(sony.connection.timer);
+          if (sony.connection.timeoutTimer)
+            clearTimeout(sony.connection.timeoutTimer);
           client.stop();
           sony.connection.connected = true;
         });
@@ -66,13 +68,49 @@ sony.pollConnection = async () => {
     client.search("urn:schemas-sony-com:service:ScalarWebAPI:1");
   }, sony.connection.interval);
 
-  sony.connectionTimeoutTimer = setTimeout(() => {
-    clearTimeout(sony.connectionTimer);
+  sony.connection.timeoutTimer = setTimeout(() => {
+    clearTimeout(sony.connection.timer);
+    client.stop();
     console.log("Timeout - Connection not found");
     sony.connection.timer = null;
     sony.connection.connecting = false;
     sony.connection.connected = false;
   }, sony.connection.timeLimit);
+};
+
+sony.makeApiCall = async (body) => {
+  const endpoint = sony.connection.endpoint;
+  try {
+    const res = await fetch(`${endpoint}/camera`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    const jsonres = await res.json();
+    return jsonres;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// Methods for shooting stills
+sony.beginShootMode = async () => {
+  let ret = { error: null, data: null };
+  let calls = await sony.makeApiCall(bodies.getAvailableApiList);
+  calls = calls.result[0];
+  if (!calls.includes("startRecMode")) {
+    ret.error = "startRecMode not available";
+    return ret;
+  }
+
+  const res = await sony.makeApiCall(bodies.startRecMode);
+  console.log(res.result[0]);
+  if (res.result[0] === 0) {
+    ret.data = "Success";
+    return ret;
+  }
+  // console.log(await sony.makeApiCall(bodies.startRecMode));
+  // console.log(await sony.makeApiCall(bodies.getAvailableApiList));
+  // console.log(await sony.makeApiCall(bodies.stopRecMode));
 };
 
 module.exports = sony;
