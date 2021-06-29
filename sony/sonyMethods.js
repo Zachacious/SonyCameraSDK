@@ -116,6 +116,7 @@ sony.beginShootMode = async () => {
   }
 
   const res = await sony.makeApiCall(bodies.startRecMode);
+
   console.log(res.result[0]);
   if (res.result[0] === 0) {
     ret.data = "Success";
@@ -141,7 +142,9 @@ sony.endShootMode = async () => {
 };
 
 sony.getEventProperty = async (prop, events) => {
-  const evtProperty = events.find((p) => p.type === prop);
+  const evtProperty = events.find((p) => {
+    if (p) return p.type === prop;
+  });
   return evtProperty;
 };
 
@@ -154,22 +157,32 @@ sony.getCameraStatus = async () => {
 
 sony.takePicture = async () => {
   let ret = { error: null, data: null };
+  let res;
 
   const camStatus = await sony.getCameraStatus();
-  console.log("camera status");
-  console.log(camStatus);
-  if (camStatus !== "IDLE") {
-    console.log(await sony.makeApiCall(bodies.awaitTakePicture));
-  }
+
+  // Not sure why this must be called here...
+  // may need to delay after startrecmode
+  await sony.makeApiCall(bodies.getEvent);
 
   let calls = await sony.makeApiCall(bodies.getAvailableApiList);
   calls = calls.result[0];
-  if (!calls.includes("takePicture")) {
-    ret.error = "takePicture not available";
-    return ret;
+
+  if (camStatus !== "IDLE") {
+    if (!calls.includes("awaitTakePicture")) {
+      ret.error = "awaitTakePicture not available";
+      return ret;
+    }
+    res = await sony.makeApiCall(bodies.awaitTakePicture);
+  } else {
+    if (!calls.includes("actTakePicture")) {
+      ret.error = "takePicture not available";
+      return ret;
+    }
+
+    res = await sony.makeApiCall(bodies.actTakePicture);
   }
 
-  const res = await sony.makeApiCall(bodies.actTakePicture);
   console.log(res.result[0]);
   if (res.result[0] === 0) {
     ret.data = "Success";
