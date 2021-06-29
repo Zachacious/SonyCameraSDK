@@ -3,8 +3,16 @@ const client = new Client();
 const fetch = require("node-fetch");
 const stringParserXML = require("xml2js").parseString;
 const bodies = require("./sonySDK");
+const EventEmitter = require("events");
+// const eventEmitter = new ee();
 
 let sony = {};
+
+// events ===============================================
+
+sony.events = new EventEmitter();
+
+//CONNECTION =============================================
 
 sony.connection = {
   timer: null,
@@ -13,7 +21,7 @@ sony.connection = {
   connecting: false,
   endpoint: "",
   interval: 200,
-  timeLimit: 3000,
+  timeLimit: 10000,
 };
 sony.deviceInfo = {
   raw: null,
@@ -51,12 +59,14 @@ client.on("response", function inResponse(headers, code, rinfo) {
             clearTimeout(sony.connection.timeoutTimer);
           client.stop();
           sony.connection.connected = true;
+          sony.events.emit("sony-connected");
         });
       });
     } catch (err) {
       console.log("Error fetching connection data as json");
       console.log(err);
       sony.connection.connected = false;
+      sony.events.emit("sony-disconnected");
     }
   }
 });
@@ -75,8 +85,11 @@ sony.pollConnection = async () => {
     sony.connection.timer = null;
     sony.connection.connecting = false;
     sony.connection.connected = false;
+    sony.events.emit("sony-disconnected");
   }, sony.connection.timeLimit);
 };
+
+//=============================================================================
 
 sony.makeApiCall = async (body) => {
   const endpoint = sony.connection.endpoint;
@@ -108,9 +121,6 @@ sony.beginShootMode = async () => {
     ret.data = "Success";
     return ret;
   }
-  // console.log(await sony.makeApiCall(bodies.startRecMode));
-  // console.log(await sony.makeApiCall(bodies.getAvailableApiList));
-  // console.log(await sony.makeApiCall(bodies.stopRecMode));
 };
 
 sony.endShootMode = async () => {
@@ -123,6 +133,43 @@ sony.endShootMode = async () => {
   }
 
   const res = await sony.makeApiCall(bodies.stopRecMode);
+  console.log(res.result[0]);
+  if (res.result[0] === 0) {
+    ret.data = "Success";
+    return ret;
+  }
+};
+
+sony.getEventProperty = async (prop, events) => {
+  const evtProperty = events.find((p) => p.type === prop);
+  return evtProperty;
+};
+
+sony.getCameraStatus = async () => {
+  const eventData = await sony.makeApiCall(bodies.getEvent);
+  const res = await sony.getEventProperty("cameraStatus", eventData.result);
+  if (!res) return "UNKNOWN";
+  return res.cameraStatus;
+};
+
+sony.takePicture = async () => {
+  let ret = { error: null, data: null };
+
+  const camStatus = await sony.getCameraStatus();
+  console.log("camera status");
+  console.log(camStatus);
+  if (camStatus !== "IDLE") {
+    console.log(await sony.makeApiCall(bodies.awaitTakePicture));
+  }
+
+  let calls = await sony.makeApiCall(bodies.getAvailableApiList);
+  calls = calls.result[0];
+  if (!calls.includes("takePicture")) {
+    ret.error = "takePicture not available";
+    return ret;
+  }
+
+  const res = await sony.makeApiCall(bodies.actTakePicture);
   console.log(res.result[0]);
   if (res.result[0] === 0) {
     ret.data = "Success";
