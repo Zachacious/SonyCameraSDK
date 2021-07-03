@@ -3286,7 +3286,7 @@ sony = {
   */
   getEvent: {
     method: "getEvent",
-    params: [true], // long polling
+    params: [false], // long polling
     id: 1,
     version: "1.0",
   },

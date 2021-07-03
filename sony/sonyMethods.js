@@ -11,6 +11,22 @@ let sony = {};
 // events ===============================================
 
 sony.events = new EventEmitter();
+sony.evt = {
+  pollingInterval: 1000,
+  interval: null,
+};
+
+sony.startPollingEvents = async () => {
+  sony.evt.interval = setInterval(async () => {
+    try {
+      const res = await sony.makeApiCall(bodies.getEvent);
+      const events = res.result;
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }, sony.evt.pollingInterval);
+};
 
 //CONNECTION =============================================
 
@@ -186,6 +202,70 @@ sony.takePicture = async () => {
   console.log(res.result[0]);
   if (res.result[0] === 0) {
     ret.data = "Success";
+    return ret;
+  }
+};
+
+sony.startLiveView = async () => {
+  let ret = { error: null, data: null };
+  let res;
+
+  const camStatus = await sony.getCameraStatus();
+
+  // Not sure why this must be called here...
+  await sony.makeApiCall(bodies.getEvent);
+
+  let calls = await sony.makeApiCall(bodies.getAvailableApiList);
+  calls = calls.result[0];
+  console.log(calls);
+
+  if (camStatus !== "IDLE") {
+    console.log("Camera not idle");
+  } else {
+    if (!calls.includes("startLiveview")) {
+      ret.error = "startLiveVIew not available";
+      return ret;
+    }
+
+    res = await sony.makeApiCall(bodies.startLiveview);
+  }
+
+  // console.log(res);
+  if (res.result[0]) {
+    ret.data = res.result;
+    return ret;
+  }
+};
+
+sony.endLiveView = async () => {
+  let ret = { error: null, data: null };
+  let res;
+
+  const camStatus = await sony.getCameraStatus();
+
+  // Not sure why this must be called here...
+  await sony.makeApiCall(bodies.getEvent);
+
+  let calls = await sony.makeApiCall(bodies.getAvailableApiList);
+  calls = calls.result[0];
+  console.log(calls);
+
+  if (camStatus !== "IDLE") {
+    console.log("Camera not idle");
+    ret.error = "Camera not idle";
+    return ret;
+  } else {
+    if (!calls.includes("endLiveview")) {
+      ret.error = "endLiveVIew not available";
+      return ret;
+    }
+
+    res = await sony.makeApiCall(bodies.endLiveview);
+  }
+
+  // console.log(res);
+  if (res.result[0]) {
+    ret.data = res.result;
     return ret;
   }
 };
